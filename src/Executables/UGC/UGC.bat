@@ -72,8 +72,6 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe" /v
 
 reg add "HKLM\SOFTWARE\RegisteredApplications" /v "Chromium" /d "SOFTWARE\Clients\StartMenuInternet\Chromium\Capabilities" /f
 
-copy /y "ugc_uninstaller.exe" "%ProgramData%\chocolatey\tools"
-
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\UGC-Uninstaller" /v "DisplayName" /t REG_SZ /d "Ungoogled Chromium" /f
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\UGC-Uninstaller" /v "DisplayIcon" /t REG_SZ /d "%ICON%" /f
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\UGC-Uninstaller" /v "UninstallString" /t REG_SZ /d """%PROGRAMFILES%\UngoogledChromium\Ungoogled Uninstaller.exe""" /f
@@ -102,10 +100,10 @@ reg add "HKLM\SOFTWARE\WOW6432Node\Google\Chrome" /f
 reg add "HKLM\SOFTWARE\WOW6432Node\Google\Chrome\Extensions" /f
 
 reg add "HKLM\SOFTWARE\WOW6432Node\Google\Chrome\Extensions\ocaahdebbfolfmndjeplogmgcagdmblk" /v "Path" /t REG_SZ /d "%PROGRAMFILES%\UngoogledChromium\Extensions\Chromium.Web.Store.crx" /f
-reg add "HKLM\SOFTWARE\WOW6432Node\Google\Chrome\Extensions\ocaahdebbfolfmndjeplogmgcagdmblk" /v "Version" /t REG_SZ /d "1.5.4" /f
+reg add "HKLM\SOFTWARE\WOW6432Node\Google\Chrome\Extensions\ocaahdebbfolfmndjeplogmgcagdmblk" /v "Version" /t REG_SZ /d "1.5.4.2" /f
 
 reg add "HKLM\SOFTWARE\WOW6432Node\Google\Chrome\Extensions\cjpalhdlnbpafiamejdnhcphjbkeiagm" /v "Path" /t REG_SZ /d "%PROGRAMFILES%\UngoogledChromium\Extensions\uBlock.Origin.crx" /f
-reg add "HKLM\SOFTWARE\WOW6432Node\Google\Chrome\Extensions\cjpalhdlnbpafiamejdnhcphjbkeiagm" /v "Version" /t REG_SZ /d "1.52.2" /f
+reg add "HKLM\SOFTWARE\WOW6432Node\Google\Chrome\Extensions\cjpalhdlnbpafiamejdnhcphjbkeiagm" /v "Version" /t REG_SZ /d "1.57.0" /f
 
 schtasks /create /tn "UGC Update" /tr "\"%PROGRAMFILES%\UngoogledChromium\chrlauncher.exe\"" /ru "SYSTEM" /sc ONLOGON /delay "0000:30" /it /rl HIGHEST /f > NUL
 PowerShell -NoP -C "$TaskSet = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries; Set-ScheduledTask -TaskName 'UGC Update' -Settings $TaskSet" > NUL

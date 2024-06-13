@@ -42,6 +42,7 @@ actions:
     exe: "FIREFOX.bat"
     weight: 150
     option: "browser-firefox"
+  - !registryValue: {option: 'browser-firefox', path: 'HKLM\SOFTWARE\Policies\Mozilla\Firefox', value: 'BackgroundAppUpdate', data: '0', type: REG_DWORD}
 
   - !writeStatus: {status: 'Installing UGC', option: "browser-ugc"}
   - !run:
@@ -340,6 +341,13 @@ actions:
     exe: "TOOLS.bat"
     weight: 20
     option: "ame-tools"
+    onUpgrade: false
+  - !run:
+    exeDir: true
+    exe: "PATCHTOOLS.bat"
+    weight: 20
+    option: "ame-tools"
+    onUpgrade: true
 
   - !writeStatus: {status: 'Setting file associations', option: "software"}
   - !run:
@@ -353,8 +361,15 @@ actions:
     weight: 30
     option: "media-vlc"
 
-  - !writeStatus: {status: 'Setting wallpapers'}
+    # Disable Lockscreen Overlay
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: 'RotatingLockScreenOverlayEnabled', type: REG_DWORD, data: '0'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager', value: 'SubscribedContent-338387Enabled', type: REG_DWORD, data: '0'}
+
+  - !registryValue: {path: 'HKCU\SOFTWARE\Policies\Microsoft\Windows\CloudContent', value: 'DisableSpotlightCollectionOnDesktop', type: REG_DWORD, data: '1'}
+  - !registryValue: {path: 'HKCU\SOFTWARE\Policies\Microsoft\Windows\CloudContent', value: 'DisableWindowsSpotlightFeatures', type: REG_DWORD, data: '1'}
+  - !writeStatus: {option: 'ui', status: 'Setting wallpapers'}
   - !run:
+    option: 'ui'
     exeDir: true
     exe: "WALLPAPER.bat"
     weight: 20
