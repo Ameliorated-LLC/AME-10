@@ -3,7 +3,7 @@ title: Services
 description: Modification of Windows services
 privilege: TrustedInstaller
 actions:
-  - !writeStatus: {status: 'Configuring services'}
+  - !status: {status: 'Configuring services'}
   - !registryKey:
     path: "HKLM\\System\\CurrentControlSet\\Services\\WdNisDrv"
   - !registryKey:

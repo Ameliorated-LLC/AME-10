@@ -3,7 +3,7 @@ title: Software
 description: Installs software
 privilege: TrustedInstaller
 actions:
-  - !writeStatus: {status: 'Installing Open-Shell', option: "ui", cpuArch: "x64"}
+  - !status: {status: 'Installing Open-Shell', option: "ui", cpuArch: "x64"}
   - !run:
     exeDir: true
     exe: "SLNT.bat"
@@ -11,32 +11,29 @@ actions:
     option: "ui"
     cpuArch: "x64"
 
-  - !writeStatus: {status: 'Configuring user interface', option: "ui"}
-  - !run:
-    exeDir: true
-    exe: "UI.bat"
-    option: "ui"
-    weight: 20
-    cpuArch: "x64"
+    # Old Explorer Search
+  - !registryValue: {option: "ui", path: 'HKCU\Software\Classes\CLSID\{1d64637d-31e9-4b06-9124-e83fb178ac6e}\TreatAs', value: '', type: REG_SZ, data: '{64bc32b5-4eec-4de7-972d-bd8bd0324537}'}
 
-#   Old Explorer Search
-  - !registryValue: {cpuArch: "!x64", option: 'ui', path: 'HKCU\CLSID\{1d64637d-31e9-4b06-9124-e83fb178ac6e}\TreatAs', value: '', data: '{64bc32b5-4eec-4de7-972d-bd8bd0324537}', type: REG_SZ}
+  - !registryValue: {option: "ui", path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'SystemUsesLightTheme', type: REG_DWORD, data: 0}
+  - !registryValue: {option: "ui", path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize', value: 'AppsUseLightTheme', type: REG_DWORD, data: 1}
 
-  - !writeStatus: {status: 'Installing Scoop apps', option: "software"}
-  - !run:
-    exeDir: true
-    exe: "PowerShell"
-    args: '-NoP -ExecutionPolicy Bypass -File scoop.ps1'
-    weight: 120
+  - !registryValue: {option: "ui", path: 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced', value: 'StartShownOnUpgrade', type: REG_DWORD, data: 1}
+
+  - !status: {status: 'Installing Git', option: "software"}
+  - !software: { name: "git", source: chocolatey, option: "software" }
+
+  - !status: {status: 'Installing 7zip', option: "software"}
+  - !software:
+    name: "7zip"
+    source: chocolatey
     option: "software"
 
-  - !writeStatus: {status: 'Installing Chocolatey'}
-    # Install Chocolatey
-  - !powerShell:
-    command: 'Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(''https://community.chocolatey.org/install.ps1''))'
-    weight: 30
-
-  - !writeStatus: {status: 'Installing Firefox', option: "browser-firefox"}
+  - !status: {status: 'Installing Firefox', option: "browser-firefox"}
+  - !software:
+    name: "Firefox"
+    source: chocolatey
+    option: "browser-firefox"
+    weight: 150
   - !run:
     exeDir: true
     exe: "FIREFOX.bat"
@@ -44,101 +41,97 @@ actions:
     option: "browser-firefox"
   - !registryValue: {option: 'browser-firefox', path: 'HKLM\SOFTWARE\Policies\Mozilla\Firefox', value: 'BackgroundAppUpdate', data: '0', type: REG_DWORD}
 
-  - !writeStatus: {status: 'Installing UGC', option: "browser-ugc"}
   - !run:
+    status: 'Installing UGC'
     exeDir: true
     exe: "UGC\\UGC.bat"
     weight: 150
     option: "browser-ugc"
+    hideWindow: true
 
-  - !writeStatus: {status: 'Installing LibreWolf', option: "browser-librewolf"}
+  - !status: {status: 'Installing LibreWolf', option: "browser-librewolf"}
+  - !software:
+    name: "librewolf"
+    source: chocolatey
+    option: "browser-librewolf"
+    weight: 150
   - !run:
     exeDir: true
     exe: "LIBREWOLF.bat"
     weight: 150
     option: "browser-librewolf"
 
-  - !writeStatus: {status: 'Installing Brave', option: "browser-brave"}
+  - !status: {status: 'Downloading Brave', option: "browser-brave"}
+  - !download: 
+    option: "browser-brave"
+    url: 'https://github.com/brave/brave-browser/releases/latest/download/BraveBrowserStandaloneSetup.exe'
+    destination: "BraveBrowserStandaloneSetup.exe"
+
+  - !status: {status: 'Installing Brave', option: "browser-brave"}
   - !run:
     exeDir: true
     exe: "BRAVE.bat"
     weight: 150
     option: "browser-brave"
+  - !registryValue: {option: "browser-brave", path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveVPNDisabled', type: REG_DWORD, data: '1'}
+  - !registryValue: {option: "browser-brave", path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveRewardsDisabled', type: REG_DWORD, data: '1'}
+  - !registryValue: {option: "browser-brave", path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveWalletDisabled', type: REG_DWORD, data: '1'}
+  - !registryValue: {option: "browser-brave", path: 'HKLM\SOFTWARE\Policies\BraveSoftware\Brave', value: 'BraveAIChatEnabled', type: REG_DWORD, data: '0'}
 
-  - !writeStatus: {status: 'Configuring start menu', option: "ui"}
+  - !status: {status: 'Configuring start menu', option: "ui"}
   - !run:
     exeDir: true
     exe: "STARTMENU.bat"
     weight: 15
     option: "ui"
 
-  - !writeStatus: {status: 'Installing Thunderbird', option: "email-thunderbird"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --allow-empty-checksums thunderbird'
+  - !status: {status: 'Installing Thunderbird', option: "email-thunderbird"}
+  - !software:
+    name: "thunderbird"
+    source: chocolatey
+    option: "email-thunderbird"
     weight: 100
-    option: "email-thunderbird"
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'upgrade -y --allow-empty-checksums thunderbird'
-    weight: 50
-    option: "email-thunderbird"
   - !run:
     exeDir: true
     exe: "THUNDERBIRDSHRT.bat"
     weight: 15
     option: "email-thunderbird"
 
-
-  - !writeStatus: {status: 'Installing Spark', option: "email-spark"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums sparkmail'
-    weight: 70
+  - !status: {status: 'Installing Spark', option: "email-spark"}
+  - !software: 
+    name: "sparkmail"
+    source: chocolatey
     option: "email-spark"
-
-  - !writeStatus: {status: 'Installing Mailspring', option: "email-mailspring"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums mailspring'
     weight: 70
+
+  - !status: {status: 'Installing Mailspring', option: "email-mailspring", iso: false, oobe: false}
+  - !software:
+    name: "mailspring"
+    source: chocolatey
     option: "email-mailspring"
-
-  - !writeStatus: {status: 'Installing VLC', option: "media-vlc"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums vlc'
     weight: 70
+
+  - !status: {status: 'Installing VLC', option: "media-vlc"}
+  - !software:
+    name: "vlc"
+    source: chocolatey
     option: "media-vlc"
-  - !writeStatus: {status: 'Installing mpv', option: "media-mpv"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums mpv'
     weight: 70
+    
+  - !status: {status: 'Installing mpv', option: "media-mpv"}
+  - !software:
+    name: "mpv"
+    source: chocolatey
     option: "media-mpv"
+    weight: 70
 
-  - !writeStatus: {status: 'Installing 7zip', option: "software"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums 7zip'
-    weight: 50
-    option: "software"
-  - !writeStatus: {status: 'Installing nomacs', option: "software"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums nomacs'
-    weight: 50
+  - !status: {status: 'Installing nomacs', option: "software"}
+  - !software:
+    name: "nomacs"
+    source: chocolatey
     option: "software"
 
-  - !writeStatus: {status: 'Configuring nomacs', option: "software"}
+  - !status: {status: 'Configuring nomacs', option: "software"}
 
   - !registryValue: {option: "software", path: 'HKLM\SOFTWARE\classes\nomacs.3fr.3', value: '', type: 'REG_SZ', data: 'Hasselblad Raw Image'}
   - !registryValue: {option: "software", path: 'HKLM\SOFTWARE\classes\nomacs.3fr.3\DefaultIcon', value: '', type: 'REG_SZ', data: 'C:\Program Files\nomacs\bin\nomacs.exe,5'}
@@ -292,44 +285,37 @@ actions:
     exe: "NOMACSCONF.bat"
     weight: 20
     option: "software"
-    
-  - !writeStatus: {status: 'Installing vcredist', option: "software"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums vcredist-all'
-    weight: 200
-    option: "software"
 
-  - !writeStatus: {status: 'Installing OnlyOffice', option: "office-onlyoffice"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums onlyoffice'
-    weight: 150
+  - !status: {status: 'Installing vcredist', option: "software"}
+  - !software: { name: "vcredist-all", source: chocolatey, option: "software", weight: 250 }
+
+  - !status: {status: 'Installing OnlyOffice', option: "office-onlyoffice"}
+  - !software:
+    name: "onlyoffice"
+    source: chocolatey
     option: "office-onlyoffice"
-  - !writeStatus: {status: 'Installing FreeOffice', option: "office-freeoffice"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums freeoffice'
-    weight: 150
+  - !status: {status: 'Installing FreeOffice', option: "office-freeoffice"}
+  - !software:
+    name: "freeoffice"
+    source: chocolatey
     option: "office-freeoffice"
-  - !writeStatus: {status: 'Installing LibreOffice', option: "office-libreoffice"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --force --allow-empty-checksums libreoffice'
-    weight: 150
+  - !status: {status: 'Installing LibreOffice', option: "office-libreoffice"}
+  - !software:
+    name: "libreoffice"
+    source: chocolatey
     option: "office-libreoffice"
 
-  - !writeStatus: {status: 'Installing Cascadia Mono font', option: "software"}
-  - !run:
-    path: '%ProgramData%\chocolatey\bin'
-    exe: 'choco.exe'
-    args: 'install -y --allow-empty-checksums cascadiamono'
-    weight: 30
+  - !status: {status: 'Installing Cascadia Mono font', option: "software"}
+  - !software: { name: "cascadiamono", source: chocolatey, option: "software", weight: 30 }
+
+  - !download:
+    status: 'Downloading Terminal'
     option: "software"
+    git: 'https://github.com/microsoft/terminal'
+    regex: '^Microsoft.WindowsTerminal_.*.msixbundle$'
+    destination: "terminal.msixbundle"
+  - !status: {status: 'Installing Terminal', option: "software"}
+  - !powerShell: {option: 'software', exeDir: true, command: 'Add-AppxPackage -Path .\terminal.msixbundle', runas: currentUserElevated}
 
   - !run:
     exeDir: true
@@ -341,15 +327,8 @@ actions:
     exe: "TOOLS.bat"
     weight: 20
     option: "ame-tools"
-    onUpgrade: false
-  - !run:
-    exeDir: true
-    exe: "PATCHTOOLS.bat"
-    weight: 20
-    option: "ame-tools"
-    onUpgrade: true
 
-  - !writeStatus: {status: 'Setting file associations', option: "software"}
+  - !status: {status: 'Setting file associations', option: "software"}
   - !run:
     exeDir: true
     exe: "FILEASSOC.bat"
@@ -367,7 +346,7 @@ actions:
 
   - !registryValue: {path: 'HKCU\SOFTWARE\Policies\Microsoft\Windows\CloudContent', value: 'DisableSpotlightCollectionOnDesktop', type: REG_DWORD, data: '1'}
   - !registryValue: {path: 'HKCU\SOFTWARE\Policies\Microsoft\Windows\CloudContent', value: 'DisableWindowsSpotlightFeatures', type: REG_DWORD, data: '1'}
-  - !writeStatus: {option: 'ui', status: 'Setting wallpapers'}
+  - !status: {option: 'ui', status: 'Setting wallpapers'}
   - !run:
     option: 'ui'
     exeDir: true
